@@ -883,13 +883,21 @@
 	 */
 	Owl.prototype.animate = function(coordinate) {
 		var animate = this.speed() > 0;
-
 		this.is('animating') && this.onTransitionEnd();
 
 		if (animate) {
 			this.enter('animating');
 			this.trigger('translate');
 		}
+
+		var that = this;
+		$.each(this.options.responsive, function(i, el){
+			if (typeof(el.animate) != 'undefined' && $(window).width() > parseInt(i)) {
+				var customAnimate = that.trigger('customanimation', { coordinate: {name: 'coordinate', value: coordinate}, speed: {name: 'speed', value: animate} });
+				coordinate = customAnimate.coordinate.value;
+				return;
+			}
+		})
 
 		if ($.support.transform3d && $.support.transition) {
 			this.$stage.css({
@@ -1247,7 +1255,7 @@
 	 * @param {Event} event - The event arguments.
 	 */
 	Owl.prototype.onTransitionEnd = function(event) {
-
+		
 		// if css2 animation then event object is undefined
 		if (event !== undefined) {
 			event.stopPropagation();
@@ -2313,7 +2321,7 @@
 
 		if (video.type === 'youtube') {
 			html = '<iframe width="' + width + '" height="' + height + '" src="//www.youtube.com/embed/' +
-				video.id + '?autoplay=1&v=' + video.id + '" frameborder="0" allowfullscreen></iframe>';
+				video.id + '?autoplay=1&rel=0&v=' + video.id + '" frameborder="0" allowfullscreen></iframe>';
 		} else if (video.type === 'vimeo') {
 			html = '<iframe src="//player.vimeo.com/video/' + video.id +
 				'?autoplay=1" width="' + width + '" height="' + height +
@@ -2398,6 +2406,11 @@
 			'translate.owl.carousel': $.proxy(function(e) {
 				if (e.namespace && this.swapping && (this.core.options.animateOut || this.core.options.animateIn)) {
 					this.swap();
+				}
+			}, this),
+			'customanimation.owl.carousel': $.proxy(function(e) {
+				if (e.namespace && e.coordinate.name == 'coordinate') {
+					this.coordinate = e.coordinate.value;
 				}
 			}, this)
 		};
