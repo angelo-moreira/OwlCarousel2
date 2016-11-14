@@ -35,6 +35,11 @@
 				if (e.namespace && this.swapping && (this.core.options.animateOut || this.core.options.animateIn)) {
 					this.swap();
 				}
+			}, this),
+			'customanimation.owl.carousel': $.proxy(function(e) {
+				if (e.namespace && e.property.name == 'coordinate') {
+					this.coordinate = e.property.value;
+				}
 			}, this)
 		};
 

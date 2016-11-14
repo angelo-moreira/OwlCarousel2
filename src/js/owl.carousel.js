@@ -878,12 +878,22 @@
 	 */
 	Owl.prototype.animate = function(coordinate) {
 		var animate = this.speed() > 0;
-
 		this.is('animating') && this.onTransitionEnd();
 
 		if (animate) {
 			this.enter('animating');
 			this.trigger('translate');
+
+			if (this.speed() != 0) {
+				var that = this;
+				$.each(this.options.responsive, function(i, el){
+					if (typeof(el.animate) != 'undefined' && $(window).width() > parseInt(i)) {
+						var customAnimate = that.trigger('customanimation', { property: {name: 'coordinate', value: coordinate} });
+						coordinate = customAnimate.property.value;
+						return;
+					}
+				})
+			}
 		}
 
 		if ($.support.transform3d && $.support.transition) {
@@ -1242,7 +1252,7 @@
 	 * @param {Event} event - The event arguments.
 	 */
 	Owl.prototype.onTransitionEnd = function(event) {
-
+		
 		// if css2 animation then event object is undefined
 		if (event !== undefined) {
 			event.stopPropagation();
